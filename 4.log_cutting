@@ -1,0 +1,17 @@
+Q:
+日志切割，有这样一个access.log每天会打出大量的日志。实现一个日志切割的功能，并说明该实现方式会有什么缺陷。
+
+
+A:
+首先每天都会产生大量日志。所以必须每天都进行一次切割并转存到其他位置。用crontab来实现每天定时执行，用脚本log_cutting.sh来实现切割和转存。
+假设这个日志文件在/var/log里面
+#!/bin/bash
+path="/var/log/"
+name=`date -d "yesterday" +%x`
+mkdir -p /home/logs/$name
+mv  $path/access.log /home/logs/$name/$name.log
+touch $path/access.log
+执行命令crontab -e进入编辑状态
+01 00 * * * /root/log_cutting.sh
+缺陷：如果不自动生成access.log文件可能会丢失00：00-00：01的日志文件。
+如果自动生成access.log文件切割的日志里面包含第二天00：00-00：01的日志文件
